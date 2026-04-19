@@ -30,7 +30,8 @@ The script auto-detects via `/etc/os-release` and bails on anything else.
 curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
   --yes --all \
   --host=192.168.0.123 \
-  --tailscale-authkey=tskey-auth-REPLACE_ME
+  --tailscale-authkey=tskey-auth-REPLACE_ME \
+  --tailscale-hostname=REPLACE_ME
 ```
 
 ### Full unattended setup (everything, no Tailscale auto-connect)
@@ -122,6 +123,7 @@ Precedence (highest wins): explicit `*-url` flag → `--host` + default port →
 | Flag | Description |
 |---|---|
 | `--tailscale-authkey=KEY` | Reusable Tailscale auth key. If set, runs `tailscale up --authkey=...` automatically. |
+| `--tailscale-hostname=NAME` | Sets the machine's hostname in your tailnet (appears in Tailscale admin console). Passed as `--hostname` to `tailscale up`. |
 
 ---
 
@@ -153,8 +155,8 @@ Installs via `curl -fsSL https://tailscale.com/install.sh | sh`.
 
 Connection behavior:
 
-- If `--tailscale-authkey=...` is passed → auto-runs `tailscale up --authkey=...`
-- In interactive mode with no auth key → prompts whether to run `tailscale up` (which prints a browser auth URL)
+- If `--tailscale-authkey=...` is passed → auto-runs `tailscale up --authkey=...` (with `--hostname=...` if `--tailscale-hostname` is also set)
+- In interactive mode with no auth key → prompts whether to run `tailscale up`. If yes, also prompts for hostname (blank = default).
 - In unattended mode with no auth key → installs only; prints a reminder to run `sudo tailscale up` later
 
 Generate reusable auth keys from the [Tailscale admin console](https://login.tailscale.com/admin/settings/keys).
