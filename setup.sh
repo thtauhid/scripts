@@ -27,6 +27,7 @@
 # Modifiers:
 #   --yes, -y                Unattended mode (no prompts, respects component flags)
 #   --tailscale-authkey=K    Auto-connect Tailscale with this auth key
+#   --tailscale-hostname=H   Set the Tailscale hostname for this machine
 #   --help, -h               Show this help
 #
 # Default ports if only --host is given:
@@ -50,6 +51,7 @@ DO_DOCKER_MIRROR=0
 DO_TAILSCALE=0
 DO_APT_PROXY=0
 TAILSCALE_AUTHKEY=""
+TAILSCALE_HOSTNAME=""
 
 # ---- Helpers ----
 log() { echo -e "\n\033[1;34m[*]\033[0m $1"; }
@@ -105,6 +107,7 @@ for arg in "$@"; do
     --apt-proxy) DO_APT_PROXY=1 ;;
     --host=*) CACHE_HOST="${arg#*=}" ;;
     --tailscale-authkey=*) TAILSCALE_AUTHKEY="${arg#*=}" ;;
+    --tailscale-hostname=*) TAILSCALE_HOSTNAME="${arg#*=}" ;;
     --docker-mirror-url=*) DOCKER_MIRROR_URL="${arg#*=}" ;;
     --apt-proxy-url=*) APT_PROXY_URL="${arg#*=}" ;;
     --help|-h) show_help ;;
@@ -246,11 +249,22 @@ if [ "$DO_TAILSCALE" -eq 1 ]; then
 
   if [ -n "$TAILSCALE_AUTHKEY" ]; then
     log "Connecting to tailnet..."
-    tailscale up --authkey="$TAILSCALE_AUTHKEY"
+    if [ -n "$TAILSCALE_HOSTNAME" ]; then
+      tailscale up --authkey="$TAILSCALE_AUTHKEY" --hostname="$TAILSCALE_HOSTNAME"
+    else
+      tailscale up --authkey="$TAILSCALE_AUTHKEY"
+    fi
     ok "Connected: $(tailscale ip -4 2>/dev/null || echo 'check status')"
   elif [ "$ASSUME_YES" -eq 0 ]; then
     if confirm "Connect Tailscale now? (will open browser auth URL)"; then
-      tailscale up
+      if [ -z "$TAILSCALE_HOSTNAME" ]; then
+        TAILSCALE_HOSTNAME=$(ask "Tailscale hostname (leave blank to use default):")
+      fi
+      if [ -n "$TAILSCALE_HOSTNAME" ]; then
+        tailscale up --hostname="$TAILSCALE_HOSTNAME"
+      else
+        tailscale up
+      fi
     else
       echo "Skipped. Run 'sudo tailscale up' later."
     fi
