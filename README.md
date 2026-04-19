@@ -22,6 +22,33 @@ The script auto-detects via `/etc/os-release` and bails on anything else.
 
 ---
 
+## Quick copy-paste
+
+### Full unattended setup (everything, with Tailscale)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --all \
+  --host=192.168.0.123 \
+  --tailscale-authkey=tskey-auth-REPLACE_ME
+```
+
+### Full unattended setup (everything, no Tailscale auto-connect)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --all \
+  --host=192.168.0.123
+```
+
+### Interactive (asks about each component)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash
+```
+
+---
+
 ## Usage
 
 ### Interactive (default)
@@ -37,12 +64,13 @@ curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sud
 Opt-in via flags. Only components whose flags are passed will be installed/configured.
 
 ```bash
-# Just the apt proxy, cache host = 192.168.0.123
-curl -sSL <url> | sudo bash -s -- --yes --apt-proxy --host=192.168.0.123
+# Just the apt proxy
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --apt-proxy --host=192.168.0.123
 
-# Everything, single cache host, Tailscale auto-connect
-curl -sSL <url> | sudo bash -s -- --yes --all \
-  --host=192.168.0.123 --tailscale-authkey=tskey-xxxxx
+# Everything, Tailscale auto-connect
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --all --host=192.168.0.123 --tailscale-authkey=tskey-xxxxx
 ```
 
 ### Local execution
@@ -51,7 +79,7 @@ If you've already cloned the repo or copied the script:
 
 ```bash
 sudo ./setup.sh                                   # interactive
-sudo ./setup.sh --yes --all --host=cache.local    # unattended
+sudo ./setup.sh --yes --all --host=192.168.0.123  # unattended
 ```
 
 ---
@@ -173,23 +201,26 @@ Safe to re-run.
 
 ```bash
 # LXC dev box — just apt proxy
-curl -sSL <url> | sudo bash -s -- --yes --apt-proxy --host=192.168.0.123
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --apt-proxy --host=192.168.0.123
 
 # Docker workload VM — cache setup only, no Tailscale
-curl -sSL <url> | sudo bash -s -- --yes --apt-proxy --docker --docker-mirror \
-  --host=192.168.0.123
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --apt-proxy --docker --docker-mirror --host=192.168.0.123
 
-# Full provisioning with Tailscale ephemeral auth
-curl -sSL <url> | sudo bash -s -- --yes --all \
-  --host=192.168.0.123 --tailscale-authkey=tskey-auth-xxxxxxxxxx
+# Just Docker, no cache
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --docker
 
 # Different cache hosts for Docker vs apt
-curl -sSL <url> | sudo bash -s -- --yes --apt-proxy --docker-mirror \
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --apt-proxy --docker-mirror \
   --apt-proxy-url=http://apt.local:3142 \
   --docker-mirror-url=http://docker.local:5000
 
-# Custom ports via full URLs
-curl -sSL <url> | sudo bash -s -- --yes --docker --docker-mirror \
+# Custom Docker mirror port
+curl -sSL https://raw.githubusercontent.com/thtauhid/scripts/main/setup.sh | sudo bash -s -- \
+  --yes --docker --docker-mirror \
   --docker-mirror-url=http://192.168.0.123:5001
 ```
 
